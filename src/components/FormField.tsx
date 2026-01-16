@@ -1,6 +1,7 @@
+import { UseFormRegisterReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Info } from "lucide-react";
+import { Info, AlertCircle } from "lucide-react";
 
 interface FormFieldProps {
   id: string;
@@ -8,8 +9,8 @@ interface FormFieldProps {
   type?: string;
   placeholder: string;
   rules: string[];
-  value: string;
-  onChange: (value: string) => void;
+  register: UseFormRegisterReturn;
+  error?: string;
 }
 
 const FormField = ({
@@ -18,8 +19,8 @@ const FormField = ({
   type = "text",
   placeholder,
   rules,
-  value,
-  onChange,
+  register,
+  error,
 }: FormFieldProps) => {
   return (
     <div className="space-y-2 animate-slide-up">
@@ -30,10 +31,19 @@ const FormField = ({
         id={id}
         type={type}
         placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-12 border-2 border-border bg-card focus:border-primary transition-all duration-300 rounded-lg shadow-sm hover:shadow-card"
+        {...register}
+        className={`h-12 border-2 bg-card transition-all duration-300 rounded-lg shadow-sm hover:shadow-card ${
+          error 
+            ? "border-destructive focus:border-destructive" 
+            : "border-border focus:border-primary"
+        }`}
       />
+      {error && (
+        <div className="flex items-center gap-2 text-destructive text-sm">
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
       <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
         <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
         <div className="space-y-1">

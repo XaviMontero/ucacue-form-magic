@@ -1,49 +1,38 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import FormField from "@/components/FormField";
 import SuccessModal from "@/components/SuccessModal";
+import ErrorModal from "@/components/ErrorModal";
+import { schema, type FormData } from "@/utils/formValidation";
 import { GraduationCap, BookOpen, Send } from "lucide-react";
 
-interface FormData {
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  edad: string;
-  direccion: string;
-}
-
 const Index = () => {
-  const [formData, setFormData] = useState<FormData>({
-    nombre: "",
-    apellido: "",
-    email: "",
-    telefono: "",
-    edad: "",
-    direccion: "",
-  });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
-  const handleChange = (field: keyof FormData) => (value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (data: FormData) => {
+    console.log("Datos válidos:", data);
+    setShowSuccess(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowSuccess(true);
+  const onError = () => {
+    setShowError(true);
   };
 
   const handleCloseModal = () => {
     setShowSuccess(false);
-    setFormData({
-      nombre: "",
-      apellido: "",
-      email: "",
-      telefono: "",
-      edad: "",
-      direccion: "",
-    });
+    reset();
+  };
+
+  const handleCloseErrorModal = () => {
+    setShowError(false);
   };
 
   return (
@@ -74,14 +63,14 @@ const Index = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <FormField
                 id="nombre"
                 label="Nombre"
                 placeholder="Ej: Juan"
-                value={formData.nombre}
-                onChange={handleChange("nombre")}
+                register={register("nombre")}
+                error={errors.nombre?.message}
                 rules={[
                   "Campo requerido",
                   "Mínimo 2 caracteres",
@@ -92,8 +81,8 @@ const Index = () => {
                 id="apellido"
                 label="Apellido"
                 placeholder="Ej: Pérez"
-                value={formData.apellido}
-                onChange={handleChange("apellido")}
+                register={register("apellido")}
+                error={errors.apellido?.message}
                 rules={[
                   "Campo requerido",
                   "Mínimo 2 caracteres",
@@ -107,8 +96,8 @@ const Index = () => {
               label="Correo Electrónico"
               type="email"
               placeholder="Ej: juan.perez@ucacue.edu.ec"
-              value={formData.email}
-              onChange={handleChange("email")}
+              register={register("email")}
+              error={errors.email?.message}
               rules={[
                 "Campo requerido",
                 "Formato válido: usuario@dominio.com",
@@ -122,8 +111,8 @@ const Index = () => {
                 label="Teléfono"
                 type="tel"
                 placeholder="Ej: 0987654321"
-                value={formData.telefono}
-                onChange={handleChange("telefono")}
+                register={register("telefono")}
+                error={errors.telefono?.message}
                 rules={[
                   "Campo requerido",
                   "Solo números",
@@ -136,8 +125,8 @@ const Index = () => {
                 label="Edad"
                 type="number"
                 placeholder="Ej: 21"
-                value={formData.edad}
-                onChange={handleChange("edad")}
+                register={register("edad")}
+                error={errors.edad?.message}
                 rules={[
                   "Campo requerido",
                   "Número entre 18 y 99",
@@ -150,8 +139,8 @@ const Index = () => {
               id="direccion"
               label="Dirección"
               placeholder="Ej: Av. Principal 123, Cuenca"
-              value={formData.direccion}
-              onChange={handleChange("direccion")}
+              register={register("direccion")}
+              error={errors.direccion?.message}
               rules={[
                 "Campo requerido",
                 "Mínimo 10 caracteres",
@@ -180,6 +169,9 @@ const Index = () => {
 
       {/* Success Modal */}
       <SuccessModal isOpen={showSuccess} onClose={handleCloseModal} />
+      
+      {/* Error Modal */}
+      <ErrorModal isOpen={showError} onClose={handleCloseErrorModal} />
     </div>
   );
 };
